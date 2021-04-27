@@ -264,9 +264,8 @@ class TextLayer extends BaseLayer {
           text: TextSpan(text: textLine, style: textStyle),
           textDirection: _textDirection);
       textPainter.layout();
-      var textLineWidth = textPainter.width;
       // We have to manually add the tracking between characters as the strokePaint ignores it
-      textLineWidth += (textLine.length - 1) * tracking;
+      var textLineWidth = textPainter.width + (textLine.length - 1) * tracking;
 
       canvas.save();
 
@@ -274,7 +273,7 @@ class TextLayer extends BaseLayer {
       _applyJustification(documentData.justification, canvas, textLineWidth);
 
       // Center text vertically
-      var multilineTranslateY = (textLineCount - 1) * lineHeight / 2;
+      var multilineTranslateY = 0; // (textLineCount - 1) * lineHeight / 2;
       var translateY = l * lineHeight - multilineTranslateY;
       canvas.translate(0, translateY);
 
