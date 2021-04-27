@@ -226,7 +226,6 @@ class TextLayer extends BaseLayer {
 
   void _drawTextWithFont(DocumentData documentData, Font font,
       Matrix4 parentMatrix, Canvas canvas) {
-    var parentScale = parentMatrix.getScale();
     var textStyle = lottieDrawable.getTextStyle(font.family, font.style);
     var text = documentData.text;
     var textDelegate = lottieDrawable.delegates?.text;
@@ -247,6 +246,15 @@ class TextLayer extends BaseLayer {
     // Line height
     var lineHeight = documentData.lineHeight * window.devicePixelRatio;
 
+    // Calculate tracking
+    var tracking = documentData.tracking / 10;
+    if (_trackingCallbackAnimation != null) {
+      tracking += _trackingCallbackAnimation!.value;
+    } else if (_trackingAnimation != null) {
+      tracking += _trackingAnimation!.value;
+    }
+    tracking = tracking * window.devicePixelRatio * textSize / 100.0;
+
     // Split full text in multiple lines
     var textLines = _getTextLines(text);
     var textLineCount = textLines.length;
@@ -256,21 +264,24 @@ class TextLayer extends BaseLayer {
           text: TextSpan(text: textLine, style: textStyle),
           textDirection: _textDirection);
       textPainter.layout();
-      var textLineWidth = textPainter.width;
+      // We have to manually add the tracking between characters as the strokePaint ignores it
+      var textLineWidth = textPainter.width + (textLine.length - 1) * tracking;
+
+      canvas.save();
 
       // Apply horizontal justification
       _applyJustification(documentData.justification, canvas, textLineWidth);
 
       // Center text vertically
-      var multilineTranslateY = (textLineCount - 1) * lineHeight / 2;
+      var multilineTranslateY = 0; // (textLineCount - 1) * lineHeight / 2;
       var translateY = l * lineHeight - multilineTranslateY;
       canvas.translate(0, translateY);
 
       // Draw each line
-      _drawFontTextLine(textLine, textStyle, documentData, canvas, parentScale);
+      _drawFontTextLine(textLine, textStyle, documentData, canvas, tracking);
 
       // Reset canvas
-      canvas.transform(parentMatrix.storage);
+      canvas.restore();
     }
   }
 
@@ -282,7 +293,7 @@ class TextLayer extends BaseLayer {
   }
 
   void _drawFontTextLine(String text, TextStyle textStyle,
-      DocumentData documentData, Canvas canvas, double parentScale) {
+      DocumentData documentData, Canvas canvas, double tracking) {
     for (var char in text.characters) {
       var charString = char;
       _drawCharacterFromFont(charString, textStyle, documentData, canvas);
@@ -291,14 +302,7 @@ class TextLayer extends BaseLayer {
           textDirection: _textDirection);
       textPainter.layout();
       var charWidth = textPainter.width;
-      // Add tracking
-      var tracking = documentData.tracking / 10.0;
-      if (_trackingCallbackAnimation != null) {
-        tracking += _trackingCallbackAnimation!.value;
-      } else if (_trackingAnimation != null) {
-        tracking += _trackingAnimation!.value;
-      }
-      var tx = charWidth + tracking * parentScale;
+      var tx = charWidth + tracking;
       canvas.translate(tx, 0);
     }
   }
