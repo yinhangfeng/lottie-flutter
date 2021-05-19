@@ -240,11 +240,11 @@ class TextLayer extends BaseLayer {
     } else {
       textSize = documentData.size;
     }
-    textStyle =
-        textStyle.copyWith(fontSize: textSize * window.devicePixelRatio);
 
     // Line height
     var lineHeight = documentData.lineHeight * window.devicePixelRatio;
+
+    var formattedText = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
 
     // Calculate tracking
     var tracking = documentData.tracking / 10;
@@ -255,34 +255,72 @@ class TextLayer extends BaseLayer {
     }
     tracking = tracking * window.devicePixelRatio * textSize / 100.0;
 
-    // Split full text in multiple lines
-    var textLines = _getTextLines(text);
-    var textLineCount = textLines.length;
-    for (var l = 0; l < textLineCount; l++) {
-      var textLine = textLines[l];
-      var textPainter = TextPainter(
-          text: TextSpan(text: textLine, style: textStyle),
-          textDirection: _textDirection);
-      textPainter.layout();
-      // We have to manually add the tracking between characters as the strokePaint ignores it
-      var textLineWidth = textPainter.width + (textLine.length - 1) * tracking;
+    textStyle = textStyle.copyWith(
+      fontSize: textSize * window.devicePixelRatio,
+      height: lineHeight / (textSize * window.devicePixelRatio),
+      wordSpacing: tracking,
+    );
 
-      canvas.save();
-
-      // Apply horizontal justification
-      _applyJustification(documentData.justification, canvas, textLineWidth);
-
-      // Center text vertically
-      var multilineTranslateY = 0; // (textLineCount - 1) * lineHeight / 2;
-      var translateY = l * lineHeight - multilineTranslateY;
-      canvas.translate(0, translateY);
-
-      // Draw each line
-      _drawFontTextLine(textLine, textStyle, documentData, canvas, tracking);
-
-      // Reset canvas
-      canvas.restore();
+    if (documentData.strokeOverFill) {
+      _drawTextWithFontWithPaint(formattedText, _fillPaint, textStyle, canvas);
+      _drawTextWithFontWithPaint(
+          formattedText, _strokePaint, textStyle, canvas);
+    } else {
+      _drawTextWithFontWithPaint(
+          formattedText, _strokePaint, textStyle, canvas);
+      _drawTextWithFontWithPaint(formattedText, _fillPaint, textStyle, canvas);
     }
+
+    // // Split full text in multiple lines
+    // var textLines = _getTextLines(text);
+    // var textLineCount = textLines.length;
+    // for (var l = 0; l < textLineCount; l++) {
+    //   var textLine = textLines[l];
+    //   var textPainter = TextPainter(
+    //       text: TextSpan(text: textLine, style: textStyle),
+    //       textDirection: _textDirection);
+    //   textPainter.layout();
+    //   // We have to manually add the tracking between characters as the strokePaint ignores it
+    //   var textLineWidth = textPainter.width + (textLine.length - 1) * tracking;
+    //
+    //   canvas.save();
+    //
+    //   // Apply horizontal justification
+    //   _applyJustification(documentData.justification, canvas, textLineWidth);
+    //
+    //   // Center text vertically
+    //   var multilineTranslateY = 0; // (textLineCount - 1) * lineHeight / 2;
+    //   var translateY = l * lineHeight - multilineTranslateY;
+    //   canvas.translate(0, translateY);
+    //
+    //   // Draw each line
+    //   _drawFontTextLine(textLine, textStyle, documentData, canvas, tracking);
+    //
+    //   // Reset canvas
+    //   canvas.restore();
+    // }
+  }
+
+  void _drawTextWithFontWithPaint(
+      String text, Paint paint, TextStyle textStyle, Canvas canvas) {
+    if (paint.color.alpha == 0) {
+      return;
+    }
+    if (paint.style == PaintingStyle.stroke && paint.strokeWidth == 0) {
+      return;
+    }
+
+    if (paint.style == PaintingStyle.fill) {
+      textStyle = textStyle.copyWith(foreground: paint);
+    } else if (paint.style == PaintingStyle.stroke) {
+      textStyle = textStyle.copyWith(background: paint);
+    }
+
+    var textPainter = TextPainter(
+        text: TextSpan(text: text, style: textStyle),
+        textDirection: _textDirection);
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(0, -textStyle.fontSize!));
   }
 
   List<String> _getTextLines(String text) {
