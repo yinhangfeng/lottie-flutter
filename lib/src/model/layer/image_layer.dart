@@ -3,6 +3,7 @@ import 'package:vector_math/vector_math_64.dart';
 import '../../animation/keyframe/base_keyframe_animation.dart';
 import '../../animation/keyframe/value_callback_keyframe_animation.dart';
 import '../../lottie_drawable.dart';
+import '../../lottie_image_asset.dart';
 import '../../lottie_property.dart';
 import '../../utils.dart';
 import '../../value/lottie_value_callback.dart';
@@ -19,8 +20,8 @@ class ImageLayer extends BaseLayer {
   @override
   void drawLayer(Canvas canvas, Size size, Matrix4 parentMatrix,
       {required int parentAlpha}) {
-    var bitmap = getBitmap();
-    if (bitmap == null) {
+    var imageAsset = getImageAsset();
+    if (imageAsset == null) {
       return;
     }
     var density = window.devicePixelRatio;
@@ -31,27 +32,30 @@ class ImageLayer extends BaseLayer {
     }
     canvas.save();
     canvas.transform(parentMatrix.storage);
-    var src =
-        Rect.fromLTWH(0, 0, bitmap.width.toDouble(), bitmap.height.toDouble());
-    var dst = Rect.fromLTWH(
-        0, 0, bitmap.width * density, bitmap.height.toDouble() * density);
-    canvas.drawImageRect(bitmap, src, dst, paint);
+    var src = Rect.fromLTWH(0, 0, imageAsset.loadedImage!.width.toDouble(),
+        imageAsset.loadedImage!.height.toDouble());
+    var dst = Rect.fromLTWH(0, 0, imageAsset.width * density,
+        imageAsset.height.toDouble() * density);
+    canvas.drawImageRect(imageAsset.loadedImage!, src, dst, paint);
     canvas.restore();
   }
 
   @override
   Rect getBounds(Matrix4 parentMatrix, {required bool applyParents}) {
     var superBounds = super.getBounds(parentMatrix, applyParents: applyParents);
-    var bitmap = getBitmap();
-    if (bitmap != null) {
-      var bounds = Rect.fromLTWH(0, 0, bitmap.width * window.devicePixelRatio,
-          bitmap.height * window.devicePixelRatio);
+    var imageAsset = getImageAsset();
+    if (imageAsset != null) {
+      var bounds = Rect.fromLTWH(
+          0,
+          0,
+          imageAsset.width * window.devicePixelRatio,
+          imageAsset.height * window.devicePixelRatio);
       return boundsMatrix.mapRect(bounds);
     }
     return superBounds;
   }
 
-  Image? getBitmap() {
+  LottieImageAsset? getImageAsset() {
     var refId = layerModel.refId;
     return lottieDrawable.getImageAsset(refId);
   }

@@ -5,6 +5,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'composition.dart';
 import 'frame_rate.dart';
 import 'lottie_delegates.dart';
+import 'lottie_image_asset.dart';
 import 'model/key_path.dart';
 import 'model/layer/composition_layer.dart';
 import 'parser/layer_parser.dart';
@@ -52,6 +53,7 @@ class LottieDrawable {
 
   double get progress => _progress ?? 0.0;
   double? _progress;
+
   bool setProgress(double value, {FrameRate? frameRate}) {
     frameRate ??= FrameRate.composition;
     var roundedProgress =
@@ -67,6 +69,7 @@ class LottieDrawable {
   }
 
   LottieDelegates? get delegates => _delegates;
+
   set delegates(LottieDelegates? delegates) {
     if (_delegates != delegates) {
       _delegates = delegates;
@@ -78,16 +81,24 @@ class LottieDrawable {
     return delegates?.text == null && composition.characters.isNotEmpty;
   }
 
-  ui.Image? getImageAsset(String? ref) {
+  LottieImageAsset? getImageAsset(String? ref) {
     var imageAsset = composition.images[ref];
     if (imageAsset != null) {
       var imageDelegate = delegates?.image;
-      ui.Image? image;
       if (imageDelegate != null) {
-        image = imageDelegate(composition, imageAsset);
+        var image = imageDelegate(composition, imageAsset);
+        if (image != null) {
+          return LottieImageAsset(
+              width: imageAsset.width,
+              height: imageAsset.height,
+              id: imageAsset.id,
+              dirName: imageAsset.dirName,
+              fileName: imageAsset.fileName,
+              loadedImage: image);
+        }
       }
 
-      return image ?? imageAsset.loadedImage;
+      return imageAsset;
     } else {
       return null;
     }
@@ -99,6 +110,7 @@ class LottieDrawable {
   }
 
   List<ValueDelegate> _valueDelegates = <ValueDelegate>[];
+
   void _updateValueDelegates(List<ValueDelegate>? newDelegates) {
     if (identical(_valueDelegates, newDelegates)) return;
 
