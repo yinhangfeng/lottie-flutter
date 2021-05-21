@@ -13,7 +13,8 @@ class LottieImageAsset {
       required this.height,
       required this.id,
       required this.fileName,
-      required this.dirName});
+      required this.dirName,
+      this.loadedImage});
 
   @override
   String toString() =>
