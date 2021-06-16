@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 import '../../animation/keyframe/base_keyframe_animation.dart';
 import '../../animation/keyframe/value_callback_keyframe_animation.dart';
@@ -24,6 +25,10 @@ class ImageLayer extends BaseLayer {
     if (imageAsset == null) {
       return;
     }
+    var image = imageAsset.loadedImage;
+    if (image == null) {
+      return;
+    }
     var density = window.devicePixelRatio;
 
     paint.setAlpha(parentAlpha);
@@ -32,11 +37,9 @@ class ImageLayer extends BaseLayer {
     }
     canvas.save();
     canvas.transform(parentMatrix.storage);
-    var src = Rect.fromLTWH(0, 0, imageAsset.loadedImage!.width.toDouble(),
-        imageAsset.loadedImage!.height.toDouble());
     var dst = Rect.fromLTWH(0, 0, imageAsset.width * density,
         imageAsset.height.toDouble() * density);
-    canvas.drawImageRect(imageAsset.loadedImage!, src, dst, paint);
+    paintImage(canvas: canvas, rect: dst, image: image, fit: BoxFit.cover);
     canvas.restore();
   }
 
