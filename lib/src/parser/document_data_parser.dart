@@ -4,7 +4,7 @@ import 'json_utils.dart';
 import 'moshi/json_reader.dart';
 
 final JsonReaderOptions _names = JsonReaderOptions.of(
-    ['t', 'f', 's', 'j', 'tr', 'lh', 'ls', 'fc', 'sc', 'sw', 'of']);
+    ['t', 'f', 's', 'j', 'tr', 'lh', 'ls', 'fc', 'sc', 'sw', 'of', 'sz', 'ps']);
 
 DocumentData documentDataParser(JsonReader reader, {required double scale}) {
   String? text;
@@ -18,6 +18,10 @@ DocumentData documentDataParser(JsonReader reader, {required double scale}) {
   var strokeColor = const Color(0x00000000);
   var strokeWidth = 0.0;
   var strokeOverFill = true;
+  double? width;
+  double? height;
+  var offsetX = 0.0;
+  var offsetY = 0.0;
 
   reader.beginObject();
   while (reader.hasNext()) {
@@ -61,6 +65,28 @@ DocumentData documentDataParser(JsonReader reader, {required double scale}) {
       case 10:
         strokeOverFill = reader.nextBoolean();
         break;
+      case 11:
+        if (reader.peek() == Token.beginArray) {
+          reader.beginArray();
+          width = reader.nextDouble();
+          height = reader.nextDouble();
+          reader.endArray();
+        } else {
+          reader.skipName();
+          reader.skipValue();
+        }
+        break;
+      case 12:
+        if (reader.peek() == Token.beginArray) {
+          reader.beginArray();
+          offsetX = reader.nextDouble();
+          offsetY = reader.nextDouble();
+          reader.endArray();
+        } else {
+          reader.skipName();
+          reader.skipValue();
+        }
+        break;
       default:
         reader.skipName();
         reader.skipValue();
@@ -69,15 +95,20 @@ DocumentData documentDataParser(JsonReader reader, {required double scale}) {
   reader.endObject();
 
   return DocumentData(
-      text: text ?? '',
-      fontName: fontName,
-      size: size,
-      justification: justification,
-      tracking: tracking,
-      lineHeight: lineHeight,
-      baselineShift: baselineShift,
-      color: fillColor,
-      strokeColor: strokeColor,
-      strokeWidth: strokeWidth,
-      strokeOverFill: strokeOverFill);
+    text: text ?? '',
+    fontName: fontName,
+    size: size,
+    justification: justification,
+    tracking: tracking,
+    lineHeight: lineHeight,
+    baselineShift: baselineShift,
+    color: fillColor,
+    strokeColor: strokeColor,
+    strokeWidth: strokeWidth,
+    strokeOverFill: strokeOverFill,
+    width: width,
+    height: height,
+    offsetX: offsetX,
+    offsetY: offsetY,
+  );
 }
