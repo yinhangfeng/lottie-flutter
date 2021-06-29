@@ -262,13 +262,15 @@ class TextLayer extends BaseLayer {
     );
 
     if (documentData.strokeOverFill) {
-      _drawTextWithFontWithPaint(formattedText, _fillPaint, textStyle, canvas);
       _drawTextWithFontWithPaint(
-          formattedText, _strokePaint, textStyle, canvas);
+          formattedText, documentData, _fillPaint, textStyle, canvas);
+      _drawTextWithFontWithPaint(
+          formattedText, documentData, _strokePaint, textStyle, canvas);
     } else {
       _drawTextWithFontWithPaint(
-          formattedText, _strokePaint, textStyle, canvas);
-      _drawTextWithFontWithPaint(formattedText, _fillPaint, textStyle, canvas);
+          formattedText, documentData, _strokePaint, textStyle, canvas);
+      _drawTextWithFontWithPaint(
+          formattedText, documentData, _fillPaint, textStyle, canvas);
     }
 
     // // Split full text in multiple lines
@@ -301,8 +303,8 @@ class TextLayer extends BaseLayer {
     // }
   }
 
-  void _drawTextWithFontWithPaint(
-      String text, Paint paint, TextStyle textStyle, Canvas canvas) {
+  void _drawTextWithFontWithPaint(String text, DocumentData documentData,
+      Paint paint, TextStyle textStyle, Canvas canvas) {
     if (paint.color.alpha == 0) {
       return;
     }
@@ -317,10 +319,36 @@ class TextLayer extends BaseLayer {
     }
 
     var textPainter = TextPainter(
-        text: TextSpan(text: text, style: textStyle),
-        textDirection: _textDirection);
-    textPainter.layout();
-    textPainter.paint(canvas, Offset(0, -textStyle.fontSize!));
+      text: TextSpan(text: text, style: textStyle),
+      textAlign: documentData.justification == Justification.center
+          ? TextAlign.center
+          : documentData.justification == Justification.leftAlign
+              ? TextAlign.left
+              : TextAlign.right,
+      textDirection: _textDirection,
+    );
+    var width = documentData.width != null
+        ? documentData.width! * window.devicePixelRatio
+        : double.infinity;
+    textPainter.layout(maxWidth: width);
+    var offsetX = documentData.offsetX * window.devicePixelRatio;
+    var offsetY = documentData.offsetY * window.devicePixelRatio;
+    if (offsetY == 0) {
+      offsetY -= textStyle.fontSize!;
+    }
+    if (documentData.width == null) {
+      switch (documentData.justification) {
+        case Justification.rightAlign:
+          offsetX -= textPainter.width;
+          break;
+        case Justification.center:
+          offsetX -= textPainter.width / 2;
+          break;
+        default:
+          break;
+      }
+    }
+    textPainter.paint(canvas, Offset(offsetX, offsetY));
   }
 
   List<String> _getTextLines(String text) {

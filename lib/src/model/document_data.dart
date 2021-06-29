@@ -14,6 +14,10 @@ class DocumentData {
   final Color strokeColor;
   final double strokeWidth;
   final bool strokeOverFill;
+  final double? width;
+  final double? height;
+  final double offsetX;
+  final double offsetY;
 
   DocumentData({
     required this.text,
@@ -27,23 +31,11 @@ class DocumentData {
     required this.strokeColor,
     required this.strokeWidth,
     required this.strokeOverFill,
+    this.width,
+    this.height,
+    required this.offsetX,
+    required this.offsetY,
   });
-
-  @override
-  int get hashCode {
-    return hashValues(
-        text,
-        fontName,
-        size,
-        justification.index,
-        tracking,
-        lineHeight,
-        baselineShift,
-        color,
-        strokeColor,
-        strokeWidth,
-        strokeOverFill);
-  }
 
   @override
   bool operator ==(Object other) =>
@@ -60,5 +52,27 @@ class DocumentData {
           color == other.color &&
           strokeColor == other.strokeColor &&
           strokeWidth == other.strokeWidth &&
-          strokeOverFill == other.strokeOverFill;
+          strokeOverFill == other.strokeOverFill &&
+          width == other.width &&
+          height == other.height &&
+          offsetX == other.offsetX &&
+          offsetY == other.offsetY;
+
+  @override
+  int get hashCode =>
+      text.hashCode ^
+      fontName.hashCode ^
+      size.hashCode ^
+      justification.hashCode ^
+      tracking.hashCode ^
+      lineHeight.hashCode ^
+      baselineShift.hashCode ^
+      color.hashCode ^
+      strokeColor.hashCode ^
+      strokeWidth.hashCode ^
+      strokeOverFill.hashCode ^
+      width.hashCode ^
+      height.hashCode ^
+      offsetX.hashCode ^
+      offsetY.hashCode;
 }
