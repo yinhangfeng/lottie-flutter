@@ -326,11 +326,14 @@ class TextLayer extends BaseLayer {
               ? TextAlign.left
               : TextAlign.right,
       textDirection: _textDirection,
+      // textHeightBehavior: const TextHeightBehavior(
+      //   leadingDistribution: TextLeadingDistribution.proportional,
+      // ),
     );
     var width = documentData.width != null
         ? documentData.width! * window.devicePixelRatio
         : double.infinity;
-    textPainter.layout(maxWidth: width);
+    textPainter.layout(minWidth: width.isFinite ? width : 0, maxWidth: width);
     var offsetX = documentData.offsetX * window.devicePixelRatio;
     var offsetY = documentData.offsetY * window.devicePixelRatio;
     if (offsetY == 0) {
@@ -344,7 +347,7 @@ class TextLayer extends BaseLayer {
         case Justification.center:
           offsetX -= textPainter.width / 2;
           break;
-        default:
+        case Justification.leftAlign:
           break;
       }
     }
