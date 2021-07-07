@@ -326,9 +326,11 @@ class TextLayer extends BaseLayer {
               ? TextAlign.left
               : TextAlign.right,
       textDirection: _textDirection,
-      // textHeightBehavior: const TextHeightBehavior(
-      //   leadingDistribution: TextLeadingDistribution.proportional,
-      // ),
+      textHeightBehavior: const TextHeightBehavior(
+        applyHeightToFirstAscent: false,
+        applyHeightToLastDescent: false,
+        // leadingDistribution: TextLeadingDistribution.proportional,
+      ),
     );
     var width = documentData.width != null
         ? documentData.width! * window.devicePixelRatio
