@@ -39,7 +39,12 @@ class ImageLayer extends BaseLayer {
     canvas.transform(parentMatrix.storage);
     var dst = Rect.fromLTWH(0, 0, imageAsset.width * density,
         imageAsset.height.toDouble() * density);
-    paintImage(canvas: canvas, rect: dst, image: image, fit: BoxFit.cover);
+    paintImage(
+        canvas: canvas,
+        rect: dst,
+        image: image,
+        fit: BoxFit.cover,
+        opacity: parentAlpha / 255);
     canvas.restore();
   }
 
