@@ -95,6 +95,11 @@ class CompositionLayer extends BaseLayer {
       canvas.save();
     }
 
+    // if (layerModel.name == '图一对话框') {
+    //   canvas.drawRect(Rect.fromLTWH(0, 0, 1000, 1000), Paint()..color = Color(
+    //       0x33ff0000));
+    // }
+
     var childAlpha = isDrawingWithOffScreen ? 255 : parentAlpha;
     for (var i = _layers.length - 1; i >= 0; i--) {
       if (!newClipRect.isEmpty) {

@@ -318,6 +318,8 @@ class TextLayer extends BaseLayer {
       textStyle = textStyle.copyWith(background: paint);
     }
 
+    textStyle = textStyle.copyWith(backgroundColor: Color(0x44000000));
+
     var textPainter = TextPainter(
       text: TextSpan(text: text, style: textStyle),
       textAlign: documentData.justification == Justification.center
@@ -339,7 +341,7 @@ class TextLayer extends BaseLayer {
     var offsetX = documentData.offsetX * window.devicePixelRatio;
     var offsetY = documentData.offsetY * window.devicePixelRatio;
     if (offsetY == 0) {
-      offsetY -= textStyle.fontSize!;
+      offsetY -= textStyle.fontSize ?? 0;
     }
     if (documentData.width == null) {
       switch (documentData.justification) {
@@ -353,6 +355,15 @@ class TextLayer extends BaseLayer {
           break;
       }
     }
+    canvas.drawRect(Rect.fromLTWH(offsetX, 0, 200, 500),
+        Paint()..color = Color(0x33000000));
+    canvas.drawRect(
+        Rect.fromLTWH(offsetX + 100, offsetY, 100, textStyle.fontSize!),
+        Paint()..color = Color(0x66ff0000));
+    canvas.drawRect(
+        Rect.fromLTWH(
+            offsetX + 200, -textStyle.fontSize!, 200, textStyle.fontSize!),
+        Paint()..color = Color(0x6600ff00));
     textPainter.paint(canvas, Offset(offsetX, offsetY));
   }
 

@@ -37,6 +37,8 @@ class ImageLayer extends BaseLayer {
     }
     canvas.save();
     canvas.transform(parentMatrix.storage);
+    canvas.drawRect(Rect.fromLTWH(0, -180, 800, 180), Paint()..color = Color(
+        0x3300ff00));
     var dst = Rect.fromLTWH(0, 0, imageAsset.width * density,
         imageAsset.height.toDouble() * density);
     paintImage(
